@@ -1,0 +1,1321 @@
+/* ---------- tokens ---------- */
+
+@property --ambient-a {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --ambient-b {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+:root {
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+
+  --bg: #f5f5f7;
+  --card: rgba(255, 255, 255, 0.72);
+  --card-border: rgba(0, 0, 0, 0.04);
+  --text: #1d1d1f;
+  --text-2: #6e6e73;
+  --text-3: #aeaeb2;
+  --separator: rgba(60, 60, 67, 0.12);
+  --fill: rgba(118, 118, 128, 0.08);
+  --fill-2: rgba(118, 118, 128, 0.16);
+  --hover: rgba(0, 0, 0, 0.025);
+  --shadow: 0 0.5px 1px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03), 0 18px 48px rgba(0, 0, 0, 0.05);
+  --knob-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.16);
+  --toast-bg: rgba(29, 29, 31, 0.86);
+
+  --blue: #007aff;
+  --green: #34c759;
+  --orange: #ff9500;
+  --red: #ff3b30;
+  --indigo: #5856d6;
+  --purple: #af52de;
+
+  --popover: rgba(255, 255, 255, 0.9);
+  --seg-thumb: #fff;
+  --wx-cloud-a: #ffffff;
+  --wx-cloud-b: #d5dbe4;
+  --wx-cloud-back: #b8c0cc;
+  --wx-rain: #007aff;
+  --wx-snow: #8ab4e8;
+  --wx-moon: #f2c94c;
+
+  --accent: var(--blue);
+  --radius-card: 22px;
+
+  --ambient-a: color-mix(in srgb, var(--blue) 14%, transparent);
+  --ambient-b: color-mix(in srgb, var(--green) 12%, transparent);
+  transition: --ambient-a 1.6s ease, --ambient-b 1.6s ease;
+
+  color-scheme: light;
+}
+
+/* The theme is resolved before first paint by a script in index.html (saved choice, else the OS setting). */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #000;
+  --card: rgba(28, 28, 30, 0.72);
+  --card-border: rgba(255, 255, 255, 0.07);
+  --text: #f5f5f7;
+  --text-2: #98989d;
+  --text-3: #5a5a5f;
+  --separator: rgba(84, 84, 88, 0.5);
+  --fill: rgba(118, 118, 128, 0.18);
+  --fill-2: rgba(118, 118, 128, 0.3);
+  --hover: rgba(255, 255, 255, 0.035);
+  --shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.02), 0 18px 48px rgba(0, 0, 0, 0.5);
+  --toast-bg: rgba(58, 58, 60, 0.9);
+  --popover: rgba(44, 44, 46, 0.88);
+  --seg-thumb: #636366;
+  --wx-cloud-a: #f2f2f7;
+  --wx-cloud-b: #a1a1a8;
+  --wx-cloud-back: #636366;
+  --wx-rain: #64d2ff;
+  --wx-snow: #ffffff;
+  --wx-moon: #f6e7a6;
+
+  --blue: #0a84ff;
+  --green: #30d158;
+  --orange: #ff9f0a;
+  --red: #ff453a;
+  --indigo: #5e5ce6;
+  --purple: #bf5af2;
+}
+
+/* The background glow takes on the current sky (set by the weather widget). */
+:root[data-weather='clear-day'] {
+  --ambient-a: color-mix(in srgb, var(--orange) 16%, transparent);
+  --ambient-b: color-mix(in srgb, #ffd60a 16%, transparent);
+}
+:root[data-weather='partly-day'] {
+  --ambient-a: color-mix(in srgb, var(--blue) 14%, transparent);
+  --ambient-b: color-mix(in srgb, #ffd60a 12%, transparent);
+}
+:root[data-weather='clear-night'],
+:root[data-weather='partly-night'] {
+  --ambient-a: color-mix(in srgb, var(--indigo) 18%, transparent);
+  --ambient-b: color-mix(in srgb, var(--purple) 12%, transparent);
+}
+:root[data-weather='cloudy'],
+:root[data-weather='fog'] {
+  --ambient-a: color-mix(in srgb, #8e8e93 16%, transparent);
+  --ambient-b: color-mix(in srgb, #aeb8c6 14%, transparent);
+}
+:root[data-weather='rain'] {
+  --ambient-a: color-mix(in srgb, var(--blue) 16%, transparent);
+  --ambient-b: color-mix(in srgb, var(--indigo) 12%, transparent);
+}
+:root[data-weather='snow'] {
+  --ambient-a: color-mix(in srgb, #64d2ff 16%, transparent);
+  --ambient-b: color-mix(in srgb, #c7d8ea 16%, transparent);
+}
+:root[data-weather='storm'] {
+  --ambient-a: color-mix(in srgb, var(--purple) 16%, transparent);
+  --ambient-b: color-mix(in srgb, var(--indigo) 16%, transparent);
+}
+
+/* Theme switch: the new theme is revealed by a growing circle (see ThemeToggle). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* ---------- base ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Soft ambient color behind the glass, like a macOS wallpaper bleeding through. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -20vh -10vw auto;
+  height: 70vh;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(40% 60% at 25% 30%, var(--ambient-a), transparent 70%),
+    radial-gradient(35% 55% at 78% 25%, var(--ambient-b), transparent 70%);
+  filter: blur(40px);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+code {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.9em;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--fill);
+}
+
+/* ---------- layout ---------- */
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 72px 28px 120px;
+}
+
+.hero {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 2px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--red);
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 52px;
+  line-height: 1.02;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.summary {
+  margin: 10px 0 0;
+  font-size: 19px;
+  color: var(--text-2);
+  letter-spacing: -0.015em;
+}
+
+/* Stretches so the weather widget matches the date block's height exactly. */
+.hero-side {
+  display: flex;
+  flex: none;
+}
+
+.glass {
+  background: var(--card);
+  border: 0.5px solid var(--card-border);
+  box-shadow: var(--shadow);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+}
+
+/* Pinned to the top-right corner of the screen. */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--text);
+}
+
+.theme-glyph {
+  display: grid;
+  place-items: center;
+}
+
+/* ---------- workday progress ---------- */
+
+.workday {
+  margin-bottom: 24px;
+  padding: 16px 22px 12px;
+  border-radius: var(--radius-card);
+}
+
+.workday-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.workday-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.workday-label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.workday-pct {
+  font-size: 28px;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.workday-status {
+  font-size: 14px;
+  color: var(--text-2);
+  text-align: right;
+}
+
+.workday-track {
+  position: relative;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--fill-2);
+}
+
+/* Liquid in a tube: work blue drifting into a touch of purple at the leading edge. */
+.workday-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  overflow: hidden;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #40a8ff, #0a84ff 50%, #5e5ce6 82%, #9f5af2);
+}
+
+/* Glassy highlight along the top of the liquid. */
+.workday-fill::before {
+  content: '';
+  position: absolute;
+  inset: 1px 6px auto;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+}
+
+/* A soft light sweeping along the filled part. */
+.workday-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 30%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  animation: workday-shimmer 2.2s ease-in-out infinite;
+}
+
+/* Bubbles drift along and wobble inside the liquid. Their layer is wider than any bar so spacing
+   stays even however full it is; the fill's overflow hides the rest. */
+.workday-bubbles {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 1100px;
+}
+
+/*
+ * Two independent motions for a smooth, floaty path: a steady linear drift to the right
+ * (transform) and a gentle up-and-down sway on its own rhythm (translate).
+ */
+.workday-bubble {
+  position: absolute;
+  top: calc(50% - var(--size) / 2 + var(--offset));
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.6);
+  opacity: 0;
+  animation:
+    workday-flow var(--duration) linear var(--delay) infinite,
+    workday-bob var(--bob-duration) ease-in-out var(--delay) infinite alternate;
+}
+
+.workday-head {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  color: #9f5af2;
+  background: #fff;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #9f5af2 35%, transparent), 0 0 14px 2px #9f5af2;
+}
+
+/* Pulse ring in the leading-edge purple (inherited via `color`). */
+.workday-head::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  animation: workday-pulse 1.6s ease-out infinite;
+}
+
+.workday-ticks {
+  position: relative;
+  height: 16px;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
+}
+
+.workday-ticks span {
+  position: absolute;
+  top: 0;
+  translate: -50% 0;
+  white-space: nowrap;
+  transition: color 0.4s ease;
+}
+
+.workday-ticks span:first-child {
+  translate: 0 0;
+}
+
+.workday-ticks span:last-child {
+  translate: -100% 0;
+}
+
+.workday-ticks .is-past {
+  color: var(--text-2);
+}
+
+@keyframes workday-flow {
+  0% { transform: translateX(0); opacity: 0; }
+  15%, 80% { opacity: 0.85; }
+  100% { transform: translateX(var(--drift)); opacity: 0; }
+}
+
+@keyframes workday-bob {
+  from { translate: 0 calc(var(--bob) * -1); }
+  to { translate: 0 var(--bob); }
+}
+
+@keyframes workday-shimmer {
+  0% { transform: translateX(-100%); }
+  60%, 100% { transform: translateX(340%); }
+}
+
+@keyframes workday-pulse {
+  0% { opacity: 0.8; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workday-fill::after,
+  .workday-head::after,
+  .workday-bubble {
+    animation: none;
+  }
+}
+
+/* ---------- cards ---------- */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.card {
+  position: relative;
+  padding: 18px 8px 10px;
+  border-radius: var(--radius-card);
+  background: var(--card);
+  border: 0.5px solid var(--card-border);
+  box-shadow: var(--shadow);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  scroll-margin-top: 24px;
+}
+
+.card-work { --accent: var(--blue); }
+.card-life { --accent: var(--green); }
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px 10px;
+}
+
+.card-badge {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--accent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.card-head h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--accent);
+}
+
+.card-count {
+  position: relative;
+  min-width: 2ch;
+  text-align: right;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.card-count > span {
+  display: inline-block;
+}
+
+/* ---------- add row ---------- */
+
+.add {
+  padding: 2px 0 4px;
+}
+
+.add-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 12px;
+}
+
+.add-plus {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.add-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 0;
+  font-size: 16px;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+.add-input::placeholder {
+  color: var(--text-3);
+}
+
+.add-submit {
+  flex: none;
+  height: 28px;
+  padding: 0 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+}
+
+.add-options-wrap {
+  overflow: hidden;
+}
+
+.add-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 2px 12px 10px 46px;
+}
+
+.pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 15px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  background: var(--fill);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.pill:hover {
+  background: var(--fill-2);
+}
+
+.pill.is-set {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.pill-urgent.is-set {
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 13%, transparent);
+}
+
+/* Siren is "off" (gray) until the item is marked urgent. */
+.pill-siren {
+  display: inline-block;
+  font-size: 13px;
+  line-height: 1;
+  filter: grayscale(1);
+  opacity: 0.55;
+  transition: filter 0.25s ease, opacity 0.25s ease;
+}
+
+.pill-urgent.is-set .pill-siren {
+  filter: none;
+  opacity: 1;
+  animation: siren-breathe 2.4s ease-in-out infinite;
+}
+
+/* ---------- picker field ---------- */
+
+.picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.picker:focus-within {
+  outline: 3px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  outline-offset: 1px;
+}
+
+.picker-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.picker-clear {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-right: -4px;
+  border-radius: 50%;
+  color: var(--text-3);
+  background: currentColor;
+}
+
+.picker-clear svg {
+  color: var(--bg);
+}
+
+.group-value {
+  flex: none;
+  padding: 4px 2px 4px 8px;
+  border-radius: 8px;
+  font-size: 15px;
+  color: var(--text-3);
+}
+
+.group-value.is-set {
+  color: var(--accent);
+}
+
+.pill.is-set .picker-clear {
+  color: var(--accent);
+}
+
+/* ---------- list ---------- */
+
+.list {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  position: relative;
+}
+
+.item + .item {
+  margin-top: 6px;
+}
+
+/* While dragging, the row lifts onto a solid surface above its neighbors. */
+.item.is-dragging {
+  z-index: 10;
+}
+
+.item.is-dragging .row {
+  background: var(--popover);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.item.is-dragging::before,
+.item.is-dragging + .item::before {
+  opacity: 0;
+}
+
+body:has(.item.is-dragging) {
+  cursor: grabbing;
+  user-select: none;
+}
+
+body:has(.item.is-dragging) * {
+  cursor: inherit !important;
+}
+
+/* Hairline separator inset to the text column, like iOS lists; centered in the gap between items. */
+.item::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 46px;
+  right: 12px;
+  height: 0.5px;
+  background: var(--separator);
+}
+
+.row {
+  border-radius: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.row:hover,
+.row.is-expanded {
+  background: var(--hover);
+}
+
+.row-main {
+  position: relative;
+  isolation: isolate;
+  border-radius: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 11px 12px;
+}
+
+.check {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-top: 0.5px;
+  border-radius: 50%;
+}
+
+.check svg {
+  overflow: visible;
+}
+
+.check-ring {
+  fill: none;
+  stroke: var(--text-3);
+  stroke-width: 1.6;
+  transition: stroke 0.2s ease;
+}
+
+.check:hover .check-ring {
+  stroke: var(--accent);
+}
+
+.check-fill {
+  fill: var(--accent);
+  stroke: var(--accent);
+  stroke-width: 1.6;
+}
+
+.check-mark {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.row-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.row-text {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-size: 16px;
+  line-height: 22px;
+  overflow-wrap: anywhere;
+  cursor: text;
+  transition: color 0.3s ease;
+}
+
+.row-text:disabled {
+  cursor: default;
+}
+
+.is-done .row-text {
+  color: var(--text-2);
+}
+
+.row-edit {
+  width: 100%;
+  padding: 0;
+  font-size: 16px;
+  line-height: 22px;
+  border: none;
+  outline: none;
+  background: transparent;
+  caret-color: var(--accent);
+}
+
+.row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.meta.is-overdue {
+  color: var(--red);
+}
+
+.meta.is-today {
+  color: var(--accent);
+}
+
+.meta-notes {
+  max-width: 100%;
+}
+
+.meta-notes,
+.meta-notes ~ * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta svg {
+  flex: none;
+}
+
+/*
+ * The siren mirrors the checkbox: centered 23px from the right edge (padding 12 + half of 22) and
+ * level with it (the checkbox sits half a pixel low in its line),
+ * sharing the info button's slot. On hover/focus/open it fades out so the info button can take over.
+ */
+.row-siren {
+  position: absolute;
+  top: 11.5px;
+  right: 11px;
+  display: grid;
+  place-items: center;
+  height: 22px;
+  pointer-events: none;
+}
+
+.row-siren .siren {
+  transition: opacity 0.2s ease;
+}
+
+.row:hover .row-siren .siren,
+.row:focus-within .row-siren .siren,
+.row.is-expanded .row-siren .siren {
+  opacity: 0;
+}
+
+/* Touch screens have no hover, so the info button is always shown: keep the siren beside it. */
+@media (hover: none) {
+  .row-siren {
+    position: static;
+  }
+
+  .row:focus-within .row-siren .siren,
+  .row.is-expanded .row-siren .siren {
+    opacity: 1;
+  }
+}
+
+/* ---------- urgent siren ---------- */
+
+/*
+ * Everything runs on one clock: --siren-delay (set from JS, see Siren.tsx) is a negative offset
+ * into a 4.8s period, so all urgent items move together. The ❗ breathes every 2.4s.
+ */
+.siren {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 22px;
+}
+
+.siren-emoji {
+  position: relative;
+  font-size: 16px;
+  line-height: 1;
+  animation: siren-breathe 2.4s ease-in-out infinite;
+  animation-delay: var(--siren-delay, 0ms);
+}
+
+/*
+ * The row gets a faint, even red tint, and two soft red arcs orbit its border (a conic gradient
+ * whose start angle is animated) over a faint base ring.
+ */
+@property --urgent-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.row-main.is-urgent::before,
+.row-main.is-urgent::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.row-main.is-urgent::before {
+  background: color-mix(in srgb, #ff3b30 5%, transparent);
+}
+
+/* Border: orbiting arcs over an even base ring, masked down to a 1px band all the way around. */
+.row-main.is-urgent::after {
+  --arcs: conic-gradient(
+    from var(--urgent-angle),
+    transparent,
+    color-mix(in srgb, #ff3b30 65%, transparent) 15%,
+    transparent 35%,
+    transparent 50%,
+    color-mix(in srgb, #ff3b30 65%, transparent) 65%,
+    transparent 85%
+  );
+  animation: urgent-orbit 4.8s linear infinite;
+  animation-delay: var(--siren-delay, 0ms);
+  padding: 1px;
+  background: var(--arcs), linear-gradient(color-mix(in srgb, #ff3b30 18%, transparent) 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+/* Hide the hairlines that would cut across the urgent row's border. */
+.item:has(> .row .is-urgent)::before,
+.item:has(> .row .is-urgent) + .item::before {
+  opacity: 0;
+}
+
+@keyframes siren-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+@keyframes urgent-orbit {
+  to { --urgent-angle: 360deg; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .siren *,
+  .pill-siren,
+  .row-main.is-urgent::before,
+  .row-main.is-urgent::after {
+    animation: none !important;
+  }
+
+}
+
+.info-btn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.row:hover .info-btn,
+.row:focus-within .info-btn,
+.row.is-expanded .info-btn {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .info-btn {
+    opacity: 1;
+  }
+}
+
+/* ---------- details ---------- */
+
+.details-wrap {
+  overflow: hidden;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 12px 14px 46px;
+}
+
+.notes {
+  width: 100%;
+  min-height: 60px;
+  field-sizing: content;
+  padding: 10px 12px;
+  font-size: 15px;
+  line-height: 1.4;
+  border: none;
+  border-radius: 12px;
+  background: var(--fill);
+  resize: none;
+  outline: none;
+  transition: box-shadow 0.2s ease;
+}
+
+.notes::placeholder {
+  color: var(--text-3);
+}
+
+.notes:focus {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+/* Inset grouped list, like the Settings app. */
+.group {
+  border-radius: 12px;
+  background: var(--fill);
+  overflow: hidden;
+}
+
+.group-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 7px 12px;
+}
+
+.group-row + .group-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 52px;
+  right: 0;
+  height: 0.5px;
+  background: var(--separator);
+}
+
+.glyph {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  color: #fff;
+}
+
+.glyph-red { background: var(--red); }
+.glyph-urgent {
+  font-size: 17px;
+  font-weight: 800;
+  background: var(--red);
+}
+
+.group-label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 15px;
+}
+
+.group-label small {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.details-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ---------- switch ---------- */
+
+.switch {
+  flex: none;
+  display: flex;
+  justify-content: flex-start;
+  width: 46px;
+  height: 28px;
+  padding: 2px;
+  border-radius: 14px;
+  background: var(--fill-2);
+  transition: background-color 0.25s ease;
+}
+
+.switch.is-on {
+  justify-content: flex-end;
+  background: var(--green);
+}
+
+.switch-knob {
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: var(--knob-shadow);
+}
+
+/* ---------- buttons ---------- */
+
+.text-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 2px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent);
+  border-radius: 6px;
+  transition: opacity 0.15s ease;
+}
+
+.text-btn:hover {
+  opacity: 0.7;
+}
+
+.text-btn.is-danger {
+  color: var(--red);
+}
+
+.text-btn.is-muted {
+  color: var(--text-2);
+}
+
+.button {
+  height: 36px;
+  padding: 0 18px;
+  border-radius: 18px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--blue);
+}
+
+/* ---------- completed / empty ---------- */
+
+.completed {
+  margin-top: 2px;
+}
+
+.completed-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 4px;
+  border-top: 0.5px solid var(--separator);
+  margin: 0 12px 0 12px;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.chev {
+  display: inline-grid;
+  place-items: center;
+}
+
+.completed-wrap {
+  overflow: hidden;
+}
+
+.empty {
+  overflow: hidden;
+}
+
+.empty p {
+  margin: 0;
+  padding: 18px 12px 22px 46px;
+  font-size: 15px;
+  color: var(--text-3);
+}
+
+.state {
+  padding: 40px 28px;
+  text-align: center;
+}
+
+.state h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+
+.state p {
+  margin: 0 0 20px;
+  color: var(--text-2);
+}
+
+/* ---------- toast ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  max-width: calc(100vw - 32px);
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: var(--toast-bg);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 860px) {
+  .cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .workday {
+    padding: 14px 16px 10px;
+  }
+
+  .workday-until {
+    display: none;
+  }
+
+  /* Every other hour: 9 AM, 11, 1, 3, 5 PM. */
+  .workday-ticks span:nth-child(even) {
+    visibility: hidden;
+  }
+
+  .app {
+    padding: 68px 16px 96px;
+  }
+
+  .hero {
+    flex-direction: column-reverse;
+    gap: 20px;
+  }
+
+  .hero-side {
+    width: 100%;
+  }
+
+  .wx {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .wx-card {
+    min-width: 0;
+  }
+
+  .hero h1 {
+    font-size: 40px;
+  }
+
+  .theme-toggle {
+    top: 14px;
+    right: 14px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .summary {
+    font-size: 17px;
+  }
+
+  .card {
+    padding: 14px 4px 8px;
+  }
+}
