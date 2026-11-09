@@ -7,7 +7,7 @@ import { ArrowIcon, CalendarIcon, InfoIcon, NoteIcon, TrashIcon } from './icons'
 import { Siren, useSirenPhase } from './Siren';
 import { collapse } from '../motion';
 import { formatDue, isDueToday, isOverdue } from '../dates';
-import type { Todo, TodoPatch } from '../types';
+import type { Section, Todo, TodoPatch } from '../types';
 
 interface Props {
   todo: Todo;
@@ -18,6 +18,8 @@ interface Props {
   /** True right after a drag, so the release doesn't also count as a click. */
   wasDragged?: () => boolean;
 }
+
+const LIST_NAMES: Record<Section, string> = { work: 'Work', life: 'Life', grocery: 'Groceries' };
 
 // Like Reminders, a checked item lingers briefly so you see it complete before it slides away.
 const COMPLETE_DELAY = 650;
@@ -36,7 +38,7 @@ export function TodoRow({ todo, onUpdate, onDelete, onGrab, wasDragged }: Props)
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
   const checked = pending ?? todo.done;
-  const other = todo.section === 'work' ? 'Life' : 'Work';
+  const others = (Object.keys(LIST_NAMES) as Section[]).filter((s) => s !== todo.section);
 
   function toggle() {
     if (pending !== null) {
@@ -201,15 +203,20 @@ export function TodoRow({ todo, onUpdate, onDelete, onGrab, wasDragged }: Props)
               </div>
 
               <div className="details-actions">
-                <motion.button
-                  type="button"
-                  className="text-btn"
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => onUpdate(todo.id, { section: todo.section === 'work' ? 'life' : 'work' })}
-                >
-                  Move to {other}
-                  <ArrowIcon size={14} />
-                </motion.button>
+                <div className="details-moves">
+                  {others.map((section) => (
+                    <motion.button
+                      key={section}
+                      type="button"
+                      className="text-btn"
+                      whileTap={{ scale: 0.96 }}
+                      onClick={() => onUpdate(todo.id, { section })}
+                    >
+                      Move to {LIST_NAMES[section]}
+                      <ArrowIcon size={14} />
+                    </motion.button>
+                  ))}
+                </div>
                 <motion.button
                   type="button"
                   className="text-btn is-danger"

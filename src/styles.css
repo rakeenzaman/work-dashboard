@@ -245,6 +245,23 @@ code {
   -webkit-backdrop-filter: saturate(180%) blur(24px);
 }
 
+/* Chevron that folds a section on small screens (see Collapsible.tsx). */
+.fold-btn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--text-2);
+}
+
+/* A header that folds its section when tapped. */
+.is-foldable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Pinned to the top-right corner of the screen. */
 .theme-toggle {
   position: fixed;
@@ -277,7 +294,23 @@ code {
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 14px;
+}
+
+.workday-top .fold-btn {
+  align-self: center;
+  margin: -6px -6px -6px -8px;
+}
+
+/* Bleeds into the card's side padding so, when clipped for folding, the glowing knob isn't cut off at 9 and 5. */
+.workday-body {
+  --bleed: 22px;
+  margin: 0 calc(-1 * var(--bleed));
+  padding: 14px var(--bleed) 0;
+}
+
+.workday-body.is-clipped,
+.card-body.is-clipped {
+  overflow: hidden;
 }
 
 .workday-title {
@@ -451,6 +484,363 @@ code {
   }
 }
 
+/* ---------- time tracking ---------- */
+
+.time {
+  margin-bottom: 24px;
+  padding: 16px 16px 16px;
+  border-radius: var(--radius-card);
+}
+
+.time-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 6px;
+}
+
+.time-top .fold-btn {
+  order: 2;
+  margin-left: auto;
+}
+
+.time-body {
+  overflow: hidden;
+}
+
+.time-body > .time-week {
+  padding-top: 14px;
+}
+
+.time-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.time-label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.time-total {
+  position: relative;
+  display: inline-block;
+  font-size: 28px;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.time-total > span {
+  display: inline-block;
+}
+
+.time-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.time-range {
+  min-width: 112px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+.time-arrow {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--blue);
+  transition: background-color 0.15s ease;
+}
+
+.time-arrow:hover {
+  background: var(--fill);
+}
+
+.time-today {
+  height: 26px;
+  margin-right: 6px;
+  padding: 0 11px;
+  border-radius: 13px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 12%, transparent);
+}
+
+.time-week {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.time-day {
+  display: flex;
+  flex-direction: column;
+  min-height: 132px;
+  padding: 12px 10px 8px;
+  border-radius: 16px;
+  background: var(--fill);
+}
+
+.time-day.is-today {
+  background: color-mix(in srgb, var(--blue) 8%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--blue) 28%, transparent);
+}
+
+.time-day-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.time-day-name {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.time-day-date {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.time-day.is-today .time-day-name,
+.time-day.is-today .time-day-date {
+  color: var(--blue);
+}
+
+.time-day-total {
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  transition: color 0.2s ease;
+}
+
+.time-day-total.is-empty {
+  color: var(--text-3);
+}
+
+/* How much of an 8-hour day is logged, in the workday bar's blue-to-purple. */
+.time-day-bar {
+  height: 4px;
+  margin: 8px 4px 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--fill-2);
+}
+
+.time-day-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #40a8ff, #0a84ff 50%, #5e5ce6 82%, #9f5af2);
+}
+
+.time-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.time-item + .time-item {
+  margin-top: 2px;
+}
+
+.time-entry {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 9px;
+  transition: background-color 0.15s ease, opacity 0.2s ease;
+}
+
+.time-entry:hover {
+  background: var(--hover);
+}
+
+.time-entry.is-saving {
+  opacity: 0.6;
+}
+
+.time-entry-text {
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  padding: 5px 4px;
+  font-size: 14px;
+  text-align: left;
+  color: var(--text);
+}
+
+/* Wraps to two lines, then truncates. */
+.time-entry-label {
+  flex: 1;
+  min-width: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+}
+
+.time-entry-hours {
+  flex: none;
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+  transition: opacity 0.15s ease;
+}
+
+/* The × takes the hours' place on hover. */
+.time-entry-delete {
+  position: absolute;
+  top: 14px;
+  right: 3px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--text-3);
+  opacity: 0;
+  transform: translateY(-50%) scale(0.6);
+  transition: opacity 0.15s ease, transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.15s ease;
+}
+
+.time-entry:hover .time-entry-delete,
+.time-entry-delete:focus-visible {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
+.time-entry:hover .time-entry-hours {
+  opacity: 0;
+}
+
+.time-entry-delete:hover {
+  background: var(--red);
+}
+
+.time-entry.is-editing {
+  gap: 4px;
+  padding: 2px 0;
+}
+
+.time-input {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  padding: 0 4px;
+  font-size: 14px;
+  border: none;
+  border-radius: 7px;
+  outline: none;
+  background: transparent;
+}
+
+.time-input::placeholder {
+  color: var(--text-3);
+}
+
+.time-entry.is-editing .time-input {
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+
+.time-entry.is-editing .time-input:focus {
+  box-shadow: inset 0 0 0 1.5px var(--blue);
+}
+
+.time-hours {
+  flex: none;
+  width: 44px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.time-hours.is-invalid {
+  color: var(--red);
+}
+
+.time-add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding: 4px 0 0 4px;
+}
+
+.time-add-plus {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 14%, transparent);
+}
+
+.time-add .time-hours {
+  background: var(--card);
+}
+
+.time-error {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 132px;
+  color: var(--text-2);
+}
+
+.time-error p {
+  margin: 0;
+}
+
+@media (hover: none) {
+  .time-entry-delete {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+
+  .time-entry-hours {
+    margin-right: 20px;
+  }
+}
+
 /* ---------- cards ---------- */
 
 .cards {
@@ -474,6 +864,14 @@ code {
 
 .card-work { --accent: var(--blue); }
 .card-life { --accent: var(--green); }
+.card-grocery { --accent: var(--orange); }
+
+.cards-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
 
 .card-head {
   display: flex;
@@ -1073,6 +1471,12 @@ body:has(.item.is-dragging) * {
   color: var(--text-2);
 }
 
+.details-moves {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 16px;
+}
+
 .details-actions {
   display: flex;
   justify-content: space-between;
@@ -1218,11 +1622,49 @@ body:has(.item.is-dragging) * {
   .cards {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  /* Days stack into rows; an empty day stays compact. */
+  .time-week {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .time-day {
+    min-height: 0;
+  }
+
+  /* Title and fold chevron on top; week controls on their own row underneath. */
+  .time-top {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+
+  .time-nav {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 600px) {
+  .time {
+    padding: 14px 12px 12px;
+  }
+
+  .time-top {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+
 }
 
 @media (max-width: 600px) {
   .workday {
     padding: 14px 16px 10px;
+  }
+
+  .workday-body {
+    --bleed: 16px;
   }
 
   .workday-until {

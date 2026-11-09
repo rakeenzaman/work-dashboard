@@ -53,8 +53,8 @@ export function AddTodo({ section, onAdd }: Props) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === 'Escape' && e.currentTarget.blur()}
-          placeholder="New Reminder"
-          aria-label={`New ${section === 'work' ? 'work' : 'life'} reminder`}
+          placeholder={section === 'grocery' ? 'New Item' : 'New Reminder'}
+          aria-label={section === 'grocery' ? 'New grocery item' : `New ${section} reminder`}
           maxLength={500}
         />
         <AnimatePresence>

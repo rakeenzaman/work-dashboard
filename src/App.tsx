@@ -3,13 +3,16 @@ import { AnimatePresence, motion } from 'motion/react';
 import { api } from './api';
 import { SectionPanel } from './components/SectionPanel';
 import { ThemeToggle } from './components/ThemeToggle';
+import { TimeTracker } from './components/TimeTracker';
 import { WorkdayProgress } from './components/WorkdayProgress';
 import { WeatherWidget } from './weather/WeatherWidget';
 import { isDueToday, isOverdue } from './dates';
 import { softSpring, spring } from './motion';
 import type { Section, Todo, TodoInput, TodoPatch } from './types';
 
-const SECTIONS: Section[] = ['work', 'life'];
+
+const COLUMNS: Section[][] = [['work'], ['life', 'grocery']];
+const ORDER = COLUMNS.flat();
 
 function greeting(now: Date) {
   const hour = now.getHours();
@@ -55,7 +58,7 @@ export default function App() {
     return () => window.clearTimeout(id);
   }, [toast]);
 
-  const fail = (err: unknown) => setToast(err instanceof Error ? err.message : 'Something went wrong');
+  const fail = useCallback((err: unknown) => setToast(err instanceof Error ? err.message : 'Something went wrong'), []);
 
   const add = useCallback(async (input: TodoInput) => {
     try {
@@ -110,7 +113,8 @@ export default function App() {
     }
   }, []);
 
-  const open = todos.filter((t) => !t.done);
+  // Groceries aren't reminders, so the greeting's count leaves them out.
+  const open = todos.filter((t) => !t.done && t.section !== 'grocery');
   const dueNow = open.filter((t) => isDueToday(t) || isOverdue(t)).length;
 
   const summary =
@@ -144,6 +148,7 @@ export default function App() {
       </header>
 
       <WorkdayProgress now={now} />
+      <TimeTracker now={now} onError={fail} />
 
       {status === 'error' ? (
         <motion.div className="card state" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}>
@@ -155,18 +160,23 @@ export default function App() {
         </motion.div>
       ) : (
         status === 'ready' && (
+          // Work on the left; Life with Groceries underneath on the right. One column on small screens.
           <main className="cards">
-            {SECTIONS.map((section, i) => (
-              <SectionPanel
-                key={section}
-                section={section}
-                index={i}
-                todos={todos.filter((t) => t.section === section)}
-                onAdd={add}
-                onUpdate={update}
-                onDelete={remove}
-                onReorder={reorder}
-              />
+            {COLUMNS.map((column, c) => (
+              <div key={c} className="cards-column">
+                {column.map((section) => (
+                  <SectionPanel
+                    key={section}
+                    section={section}
+                    index={ORDER.indexOf(section)}
+                    todos={todos.filter((t) => t.section === section)}
+                    onAdd={add}
+                    onUpdate={update}
+                    onDelete={remove}
+                    onReorder={reorder}
+                  />
+                ))}
+              </div>
             ))}
           </main>
         )

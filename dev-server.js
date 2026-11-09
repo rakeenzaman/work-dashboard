@@ -18,6 +18,8 @@ const ROUTES = [
   [/^\/api\/todos\/?$/, 'api/todos/index.js'],
   [/^\/api\/todos\/reorder\/?$/, 'api/todos/reorder.js'],
   [/^\/api\/todos\/[^/]+\/?$/, 'api/todos/[id].js'],
+  [/^\/api\/time\/?$/, 'api/time/index.js'],
+  [/^\/api\/time\/[^/]+\/?$/, 'api/time/[id].js'],
 ];
 
 function send(res, status, payload) {

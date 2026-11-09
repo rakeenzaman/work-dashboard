@@ -1,4 +1,4 @@
-export type Section = 'work' | 'life';
+export type Section = 'work' | 'life' | 'grocery';
 
 export interface Todo {
   id: string;
@@ -17,3 +17,15 @@ export interface Todo {
 
 export type TodoInput = Pick<Todo, 'text' | 'section'> & Partial<Pick<Todo, 'priority' | 'due' | 'notes'>>;
 export type TodoPatch = Partial<Pick<Todo, 'text' | 'notes' | 'section' | 'done' | 'priority' | 'due'>>;
+
+export interface TimeEntry {
+  id: string;
+  /** Local calendar day, `YYYY-MM-DD`. */
+  day: string;
+  label: string;
+  hours: number;
+  createdAt: string;
+}
+
+export type TimeInput = Pick<TimeEntry, 'day' | 'label' | 'hours'>;
+export type TimePatch = Partial<TimeInput>;

@@ -3,7 +3,8 @@ import { AnimatePresence, motion, Reorder } from 'motion/react';
 import { AddTodo } from './AddTodo';
 import { DraggableItem } from './DraggableItem';
 import { TodoRow } from './TodoRow';
-import { BriefcaseIcon, ChevronIcon, LeafIcon } from './icons';
+import { BriefcaseIcon, CartIcon, ChevronIcon, LeafIcon } from './icons';
+import { FoldButton, useCollapsible } from './Collapsible';
 import { collapse, listItem, softSpring, spring } from '../motion';
 import type { Section, Todo, TodoInput, TodoPatch } from '../types';
 
@@ -21,6 +22,7 @@ interface Props {
 const META = {
   work: { title: 'Work', Icon: BriefcaseIcon },
   life: { title: 'Life', Icon: LeafIcon },
+  grocery: { title: 'Groceries', Icon: CartIcon },
 } as const;
 
 // Manual order (set by dragging), oldest first as a tiebreak.
@@ -33,6 +35,10 @@ export function SectionPanel({ section, todos, index, onAdd, onUpdate, onDelete,
   // While dragging, the live order lives here; it's saved once on drop.
   const [dragIds, setDragIds] = useState<string[] | null>(null);
   const { title, Icon } = META[section];
+  // Only the Work list folds on small screens; it's for the desk.
+  const fold = useCollapsible(`${section}-collapsed`);
+  const foldable = section === 'work' && fold.compact;
+  const expanded = !foldable || fold.open;
 
   const open = todos.filter((t) => !t.done);
   const sorted = [...open].sort(compareOpen);
@@ -44,9 +50,7 @@ export function SectionPanel({ section, todos, index, onAdd, onUpdate, onDelete,
     if (ids.some((id, i) => id !== sorted[i]?.id)) onReorder(ids);
     setDragIds(null);
   }
-  const done = todos
-    .filter((t) => t.done)
-    .sort((a, b) => (b.completedAt ?? '').localeCompare(a.completedAt ?? ''));
+  const done = todos.filter((t) => t.done).sort((a, b) => (b.completedAt ?? '').localeCompare(a.completedAt ?? ''));
 
   function clearCompleted() {
     if (!window.confirm(`Delete ${done.length} completed ${done.length === 1 ? 'reminder' : 'reminders'}?`)) return;
@@ -62,7 +66,7 @@ export function SectionPanel({ section, todos, index, onAdd, onUpdate, onDelete,
       transition={{ ...softSpring, delay: 0.12 + index * 0.07 }}
       aria-labelledby={`${section}-title`}
     >
-      <header className="card-head">
+      <header className={`card-head ${foldable ? 'is-foldable' : ''}`} onClick={foldable ? fold.toggle : undefined}>
         <span className="card-badge">
           <Icon size={17} strokeWidth={2.2} />
         </span>
@@ -80,72 +84,81 @@ export function SectionPanel({ section, todos, index, onAdd, onUpdate, onDelete,
             </motion.span>
           </AnimatePresence>
         </span>
+        {foldable && (
+          <FoldButton open={expanded} onToggle={fold.toggle} label={`${title} list`} controls={`${section}-body`} />
+        )}
       </header>
 
-      <AddTodo section={section} onAdd={onAdd} />
-
-      <Reorder.Group as="ul" axis="y" className="list" values={visible.map((t) => t.id)} onReorder={setDragIds}>
-        <AnimatePresence initial={false} mode="popLayout">
-          {visible.map((todo) => (
-            <DraggableItem key={todo.id} todo={todo} onUpdate={onUpdate} onDelete={onDelete} onDrop={drop} />
-          ))}
-        </AnimatePresence>
-      </Reorder.Group>
-
       <AnimatePresence initial={false}>
-        {visible.length === 0 && (
-          <motion.div className="empty" {...collapse}>
-            <p>Nothing on your plate.</p>
+        {expanded && (
+          <motion.div id={`${section}-body`} className={foldable ? 'card-body is-clipped' : 'card-body'} {...collapse}>
+            <AddTodo section={section} onAdd={onAdd} />
+
+            <Reorder.Group as="ul" axis="y" className="list" values={visible.map((t) => t.id)} onReorder={setDragIds}>
+              <AnimatePresence initial={false} mode="popLayout">
+                {visible.map((todo) => (
+                  <DraggableItem key={todo.id} todo={todo} onUpdate={onUpdate} onDelete={onDelete} onDrop={drop} />
+                ))}
+              </AnimatePresence>
+            </Reorder.Group>
+
+            <AnimatePresence initial={false}>
+              {visible.length === 0 && (
+                <motion.div className="empty" {...collapse}>
+                  <p>Nothing on your plate.</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {done.length > 0 && (
+              <div className="completed">
+                <div className="completed-bar">
+                  <button
+                    type="button"
+                    className="text-btn is-muted"
+                    aria-expanded={showDone}
+                    onClick={() => setShowDone((s) => !s)}
+                  >
+                    <motion.span className="chev" animate={{ rotate: showDone ? 90 : 0 }} transition={spring}>
+                      <ChevronIcon size={13} strokeWidth={2.6} />
+                    </motion.span>
+                    {done.length} Completed
+                  </button>
+                  <AnimatePresence>
+                    {showDone && (
+                      <motion.button
+                        type="button"
+                        className="text-btn"
+                        onClick={clearCompleted}
+                        initial={{ opacity: 0, x: 8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 8 }}
+                      >
+                        Clear
+                      </motion.button>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <AnimatePresence initial={false}>
+                  {showDone && (
+                    <motion.div {...collapse} className="completed-wrap">
+                      <ul className="list">
+                        <AnimatePresence initial={false} mode="popLayout">
+                          {done.map((todo) => (
+                            <motion.li key={todo.id} className="item" {...listItem}>
+                              <TodoRow todo={todo} onUpdate={onUpdate} onDelete={onDelete} />
+                            </motion.li>
+                          ))}
+                        </AnimatePresence>
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
-
-      {done.length > 0 && (
-        <div className="completed">
-          <div className="completed-bar">
-            <button
-              type="button"
-              className="text-btn is-muted"
-              aria-expanded={showDone}
-              onClick={() => setShowDone((s) => !s)}
-            >
-              <motion.span className="chev" animate={{ rotate: showDone ? 90 : 0 }} transition={spring}>
-                <ChevronIcon size={13} strokeWidth={2.6} />
-              </motion.span>
-              {done.length} Completed
-            </button>
-            <AnimatePresence>
-              {showDone && (
-                <motion.button
-                  type="button"
-                  className="text-btn"
-                  onClick={clearCompleted}
-                  initial={{ opacity: 0, x: 8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 8 }}
-                >
-                  Clear
-                </motion.button>
-              )}
-            </AnimatePresence>
-          </div>
-          <AnimatePresence initial={false}>
-            {showDone && (
-              <motion.div {...collapse} className="completed-wrap">
-                <ul className="list">
-                  <AnimatePresence initial={false} mode="popLayout">
-                    {done.map((todo) => (
-                      <motion.li key={todo.id} className="item" {...listItem}>
-                        <TodoRow todo={todo} onUpdate={onUpdate} onDelete={onDelete} />
-                      </motion.li>
-                    ))}
-                  </AnimatePresence>
-                </ul>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      )}
     </motion.section>
   );
 }

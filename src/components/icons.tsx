@@ -73,6 +73,14 @@ export const BriefcaseIcon = (p: IconProps) => (
   </Icon>
 );
 
+export const CartIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3 4h2.2l2.1 10.2a1.5 1.5 0 0 0 1.5 1.2h8.4a1.5 1.5 0 0 0 1.5-1.1L20.5 8H6.1" />
+    <circle cx="9.5" cy="19.5" r="1.3" />
+    <circle cx="17" cy="19.5" r="1.3" />
+  </Icon>
+);
+
 export const LeafIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15" />

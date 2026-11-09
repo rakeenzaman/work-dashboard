@@ -1,4 +1,4 @@
-import type { Todo, TodoInput, TodoPatch } from './types';
+import type { TimeEntry, TimeInput, TimePatch, Todo, TodoInput, TodoPatch } from './types';
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -19,4 +19,12 @@ export const api = {
     request<Todo>(`/api/todos/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
   remove: (id: string) => request<void>(`/api/todos/${id}`, { method: 'DELETE' }),
   reorder: (ids: string[]) => request<Todo[]>('/api/todos/reorder', { method: 'POST', body: JSON.stringify({ ids }) }),
+};
+
+export const timeApi = {
+  list: (from: string, to: string) => request<TimeEntry[]>(`/api/time?from=${from}&to=${to}`),
+  create: (input: TimeInput) => request<TimeEntry>('/api/time', { method: 'POST', body: JSON.stringify(input) }),
+  update: (id: string, patch: TimePatch) =>
+    request<TimeEntry>(`/api/time/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
+  remove: (id: string) => request<void>(`/api/time/${id}`, { method: 'DELETE' }),
 };

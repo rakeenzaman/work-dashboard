@@ -1,5 +1,7 @@
 import { useEffect, type CSSProperties, type ReactNode } from 'react';
-import { motion, useSpring, useTransform } from 'motion/react';
+import { AnimatePresence, motion, useSpring, useTransform } from 'motion/react';
+import { FoldButton, useCollapsible } from './Collapsible';
+import { collapse } from '../motion';
 
 const START_HOUR = 9;
 const END_HOUR = 17;
@@ -8,7 +10,7 @@ const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_
 // Bubbles scattered along the bar with fixed pseudo-random sizes and timings (same every render).
 const BUBBLE_COUNT = 72;
 const BUBBLES = Array.from({ length: BUBBLE_COUNT }, (_, i) => {
-  const r = (n: number) => ((Math.sin(i * 12.9898 + n * 78.233) * 43758.5453) % 1 + 1) % 1;
+  const r = (n: number) => (((Math.sin(i * 12.9898 + n * 78.233) * 43758.5453) % 1) + 1) % 1;
   return {
     left: `${(i / BUBBLE_COUNT) * 100 + r(1) * 1.4}%`,
     '--size': `${1.2 + r(2) * 1.6}px`,
@@ -58,6 +60,7 @@ function workday(now: Date): { percent: number; status: ReactNode; weekend: bool
 /** How far through the 9–5 workday it is right now. */
 export function WorkdayProgress({ now }: { now: Date }) {
   const { percent, status, weekend } = workday(now);
+  const { compact, open, toggle } = useCollapsible('workday-collapsed');
 
   // One spring drives everything (fill, marker, number) so they move as one.
   const progress = useSpring(0, { stiffness: 110, damping: 22 });
@@ -77,7 +80,7 @@ export function WorkdayProgress({ now }: { now: Date }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 260, damping: 30, delay: 0.08 }}
     >
-      <div className="workday-top">
+      <div className={`workday-top ${compact ? 'is-foldable' : ''}`} onClick={compact ? toggle : undefined}>
         <div className="workday-title">
           <span className="workday-label">Workday</span>
           {weekend ? (
@@ -89,29 +92,40 @@ export function WorkdayProgress({ now }: { now: Date }) {
           )}
         </div>
         <span className="workday-status">{status}</span>
+        {compact && <FoldButton open={open} onToggle={toggle} label="workday progress" controls="workday-body" />}
       </div>
 
-      <div className="workday-track" aria-hidden="true">
-        <motion.div className="workday-fill" style={{ width: left }}>
-          <span className="workday-bubbles">
-            {BUBBLES.map((b, i) => (
-              <span key={i} className="workday-bubble" style={b} />
-            ))}
-          </span>
-        </motion.div>
-        {!weekend && <motion.div className="workday-head" style={{ left }} />}
-      </div>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div id="workday-body" className={`workday-body ${compact ? 'is-clipped' : ''}`} {...collapse}>
+            <div className="workday-track" aria-hidden="true">
+              <motion.div className="workday-fill" style={{ width: left }}>
+                <span className="workday-bubbles">
+                  {BUBBLES.map((b, i) => (
+                    <span key={i} className="workday-bubble" style={b} />
+                  ))}
+                </span>
+              </motion.div>
+              {!weekend && <motion.div className="workday-head" style={{ left }} />}
+            </div>
 
-      <div className="workday-ticks" aria-hidden="true">
-        {HOURS.map((hour) => {
-          const at = ((hour - START_HOUR) / (END_HOUR - START_HOUR)) * 100;
-          return (
-            <span key={hour} className={!weekend && percent > 0 && at <= percent ? 'is-past' : ''} style={{ left: `${at}%` }}>
-              {hourLabel(hour)}
-            </span>
-          );
-        })}
-      </div>
+            <div className="workday-ticks" aria-hidden="true">
+              {HOURS.map((hour) => {
+                const at = ((hour - START_HOUR) / (END_HOUR - START_HOUR)) * 100;
+                return (
+                  <span
+                    key={hour}
+                    className={!weekend && percent > 0 && at <= percent ? 'is-past' : ''}
+                    style={{ left: `${at}%` }}
+                  >
+                    {hourLabel(hour)}
+                  </span>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.section>
   );
 }
