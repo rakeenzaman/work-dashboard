@@ -6,6 +6,8 @@
 }
 
 .wx-card {
+  position: relative;
+  overflow: hidden;
   display: flex;
   width: 100%;
   min-width: 260px;
@@ -17,6 +19,7 @@
 }
 
 .wx-content {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -102,6 +105,183 @@
   border-radius: 50%;
   color: var(--blue);
   background: color-mix(in srgb, var(--blue) 14%, transparent);
+}
+
+/* ---------- sky ---------- */
+
+/* Over a sky, everything turns white, like the iOS widget. */
+.wx-card.has-sky {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+/* A barely-there inner shadow over the sky, so it reads as set into the card. */
+.wx-card.has-sky::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.26);
+  pointer-events: none;
+}
+
+.wx-card.has-sky .wx-sub {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.wx-card.has-sky .wx-cond,
+.wx-card.has-sky .wx-pin {
+  color: #fff;
+}
+
+.sky-layer,
+.sky {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Gradients run top → bottom. */
+.sky-clear.is-day { background: linear-gradient(180deg, #2f7fd8, #5aa6ec 55%, #8cc6f2); }
+.sky-partly.is-day { background: linear-gradient(180deg, #4a87c9, #72a8da 60%, #98c0e3); }
+.sky-cloudy.is-day { background: linear-gradient(180deg, #637489, #8394a8 60%, #9eacbc); }
+.sky-fog.is-day { background: linear-gradient(180deg, #7f8b98, #9aa5b1 60%, #b0bac4); }
+.sky-rain.is-day { background: linear-gradient(180deg, #4b5a6b, #63748a 60%, #7a8a9e); }
+.sky-snow.is-day { background: linear-gradient(180deg, #7f95ad, #9db0c4 60%, #b8c6d5); }
+.sky-storm.is-day { background: linear-gradient(180deg, #2f3542, #444c5c 60%, #575f70); }
+
+.sky-clear.is-night { background: linear-gradient(180deg, #0a1230, #18264f 60%, #26386a); }
+.sky-partly.is-night { background: linear-gradient(180deg, #111a36, #223056 60%, #33446c); }
+.sky-cloudy.is-night { background: linear-gradient(180deg, #1c2433, #2c3646 60%, #3a4555); }
+.sky-fog.is-night { background: linear-gradient(180deg, #2a313b, #3b434e 60%, #4a535e); }
+.sky-rain.is-night { background: linear-gradient(180deg, #151c28, #222c3b 60%, #303b4c); }
+.sky-snow.is-night { background: linear-gradient(180deg, #2a3647, #3e4c60 60%, #536276); }
+.sky-storm.is-night { background: linear-gradient(180deg, #0e1118, #1b1f2a 60%, #272c39); }
+
+.sky > * {
+  position: absolute;
+}
+
+/* Warm glow behind the sun icon in the top-right corner. */
+.sky-sun {
+  top: -45%;
+  right: -20%;
+  width: 75%;
+  height: 130%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 228, 150, 0.55), rgba(255, 228, 150, 0));
+  animation: sky-glow 6s ease-in-out infinite alternate;
+}
+
+.sky-star {
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+  animation: sky-twinkle 3s ease-in-out infinite alternate;
+}
+
+.sky-cloud {
+  width: 70%;
+  height: 55%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.32);
+  filter: blur(16px);
+  animation: sky-drift 24s ease-in-out infinite alternate;
+}
+
+.is-night .sky-cloud {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sky-rain .sky-cloud,
+.sky-storm .sky-cloud {
+  background: rgba(20, 28, 40, 0.35);
+}
+
+.sky-mist {
+  left: -30%;
+  width: 160%;
+  height: 26%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.28);
+  filter: blur(10px);
+  animation: sky-drift 16s ease-in-out infinite alternate;
+}
+
+.is-night .sky-mist {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Slanted streaks falling past the card. */
+.sky-drop {
+  top: -20px;
+  width: 1px;
+  height: 14px;
+  border-radius: 1px;
+  background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9));
+  rotate: 12deg;
+  animation: sky-rain 0.7s linear infinite;
+}
+
+/* Flakes fall steadily (transform) while swaying side to side (translate). */
+.sky-flake {
+  top: -8px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  animation-name: sky-fall, sky-sway;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: normal, alternate;
+}
+
+.sky-flash {
+  inset: 0;
+  background: rgba(255, 255, 255, 0.55);
+  opacity: 0;
+  animation: sky-flash 7s linear infinite;
+}
+
+@keyframes sky-glow {
+  from { opacity: 0.75; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1.06); }
+}
+
+@keyframes sky-twinkle {
+  from { opacity: 0.25; }
+  to { opacity: 1; }
+}
+
+@keyframes sky-drift {
+  from { transform: translateX(-12%); }
+  to { transform: translateX(12%); }
+}
+
+@keyframes sky-rain {
+  from { transform: translate(0, 0); }
+  to { transform: translate(-36px, 170px); }
+}
+
+@keyframes sky-fall {
+  from { transform: translateY(0); }
+  to { transform: translateY(150px); }
+}
+
+@keyframes sky-sway {
+  from { translate: calc(var(--sway) * -1) 0; }
+  to { translate: var(--sway) 0; }
+}
+
+@keyframes sky-flash {
+  0%, 84%, 90%, 100% { opacity: 0; }
+  85% { opacity: 0.9; }
+  86.5% { opacity: 0.15; }
+  88% { opacity: 0.6; }
 }
 
 /* ---------- skeleton ---------- */
@@ -389,7 +569,14 @@
 
 @media (prefers-reduced-motion: reduce) {
   .wx-icon *,
-  .wx-skel {
+  .wx-skel,
+  .sky > * {
     animation: none !important;
+  }
+
+  .sky-drop,
+  .sky-flake,
+  .sky-flash {
+    display: none;
   }
 }

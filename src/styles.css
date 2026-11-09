@@ -87,37 +87,31 @@
   --purple: #bf5af2;
 }
 
-/* The background glow takes on the current sky (set by the weather widget). */
-:root[data-weather='clear-day'] {
-  --ambient-a: color-mix(in srgb, var(--orange) 16%, transparent);
-  --ambient-b: color-mix(in srgb, #ffd60a 16%, transparent);
+/*
+ * The background glow matches the weather widget's sky (data-weather is set by the widget). Each
+ * mood picks one color from its sky gradient (night ones brightened a bit so they show on a dark
+ * page); the right-hand glow, beside the widget, is the stronger of the two.
+ */
+:root[data-weather] {
+  --ambient-a: color-mix(in srgb, var(--sky-glow) 12%, transparent);
+  --ambient-b: color-mix(in srgb, var(--sky-glow) 26%, transparent);
 }
-:root[data-weather='partly-day'] {
-  --ambient-a: color-mix(in srgb, var(--blue) 14%, transparent);
-  --ambient-b: color-mix(in srgb, #ffd60a 12%, transparent);
-}
-:root[data-weather='clear-night'],
-:root[data-weather='partly-night'] {
-  --ambient-a: color-mix(in srgb, var(--indigo) 18%, transparent);
-  --ambient-b: color-mix(in srgb, var(--purple) 12%, transparent);
-}
-:root[data-weather='cloudy'],
-:root[data-weather='fog'] {
-  --ambient-a: color-mix(in srgb, #8e8e93 16%, transparent);
-  --ambient-b: color-mix(in srgb, #aeb8c6 14%, transparent);
-}
-:root[data-weather='rain'] {
-  --ambient-a: color-mix(in srgb, var(--blue) 16%, transparent);
-  --ambient-b: color-mix(in srgb, var(--indigo) 12%, transparent);
-}
-:root[data-weather='snow'] {
-  --ambient-a: color-mix(in srgb, #64d2ff 16%, transparent);
-  --ambient-b: color-mix(in srgb, #c7d8ea 16%, transparent);
-}
-:root[data-weather='storm'] {
-  --ambient-a: color-mix(in srgb, var(--purple) 16%, transparent);
-  --ambient-b: color-mix(in srgb, var(--indigo) 16%, transparent);
-}
+
+:root[data-weather='clear-day'] { --sky-glow: #4aa0f0; }
+:root[data-weather='partly-day'] { --sky-glow: #6aa6dc; }
+:root[data-weather='cloudy-day'] { --sky-glow: #8394a8; }
+:root[data-weather='fog-day'] { --sky-glow: #a3adb8; }
+:root[data-weather='rain-day'] { --sky-glow: #5d7290; }
+:root[data-weather='snow-day'] { --sky-glow: #9db8d4; }
+:root[data-weather='storm-day'] { --sky-glow: #59617a; }
+
+:root[data-weather='clear-night'] { --sky-glow: #4659b8; }
+:root[data-weather='partly-night'] { --sky-glow: #4a5a9a; }
+:root[data-weather='cloudy-night'] { --sky-glow: #4f5b70; }
+:root[data-weather='fog-night'] { --sky-glow: #5d6672; }
+:root[data-weather='rain-night'] { --sky-glow: #3f5070; }
+:root[data-weather='snow-night'] { --sky-glow: #6a7d99; }
+:root[data-weather='storm-night'] { --sky-glow: #4b4f7a; }
 
 /* Theme switch: the new theme is revealed by a growing circle (see ThemeToggle). */
 ::view-transition-old(root),
@@ -219,7 +213,7 @@ code {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--red);
+  color: var(--blue);
 }
 
 .hero h1 {
@@ -914,8 +908,8 @@ body:has(.item.is-dragging) * {
 /* ---------- urgent siren ---------- */
 
 /*
- * Everything runs on one clock: --siren-delay (set from JS, see Siren.tsx) is a negative offset
- * into a 4.8s period, so all urgent items move together. The ❗ breathes every 2.4s.
+ * --siren-delay (set from JS, see Siren.tsx) is a negative offset into the 2.4s breathing loop,
+ * so every urgent ❗ pulses together.
  */
 .siren {
   position: relative;
@@ -933,47 +927,16 @@ body:has(.item.is-dragging) * {
   animation-delay: var(--siren-delay, 0ms);
 }
 
-/*
- * The row gets a faint, even red tint, and two soft red arcs orbit its border (a conic gradient
- * whose start angle is animated) over a faint base ring.
- */
-@property --urgent-angle {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 0deg;
-}
-
-.row-main.is-urgent::before,
-.row-main.is-urgent::after {
+/* Urgent rows get a faint red tint and a plain 1px red outline. */
+.row-main.is-urgent::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
   border-radius: inherit;
   pointer-events: none;
-}
-
-.row-main.is-urgent::before {
   background: color-mix(in srgb, #ff3b30 5%, transparent);
-}
-
-/* Border: orbiting arcs over an even base ring, masked down to a 1px band all the way around. */
-.row-main.is-urgent::after {
-  --arcs: conic-gradient(
-    from var(--urgent-angle),
-    transparent,
-    color-mix(in srgb, #ff3b30 65%, transparent) 15%,
-    transparent 35%,
-    transparent 50%,
-    color-mix(in srgb, #ff3b30 65%, transparent) 65%,
-    transparent 85%
-  );
-  animation: urgent-orbit 4.8s linear infinite;
-  animation-delay: var(--siren-delay, 0ms);
-  padding: 1px;
-  background: var(--arcs), linear-gradient(color-mix(in srgb, #ff3b30 18%, transparent) 0 0);
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #ff3b30 35%, transparent);
 }
 
 /* Hide the hairlines that would cut across the urgent row's border. */
@@ -987,18 +950,11 @@ body:has(.item.is-dragging) * {
   50% { transform: scale(1.08); }
 }
 
-@keyframes urgent-orbit {
-  to { --urgent-angle: 360deg; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .siren *,
-  .pill-siren,
-  .row-main.is-urgent::before,
-  .row-main.is-urgent::after {
+  .pill-siren {
     animation: none !important;
   }
-
 }
 
 .info-btn {

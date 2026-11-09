@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { coarse, describe, fetchWeather, searchPlaces, type Place, type PlaceResult, type Unit, type Weather } from './api';
 import { WeatherIcon } from './WeatherIcon';
+import { WeatherSky } from './WeatherSky';
 import { LocationIcon, SearchIcon } from '../components/icons';
 import { spring } from '../motion';
 import './weather.css';
@@ -93,7 +94,7 @@ export function WeatherWidget() {
 
   // Lets the page's ambient glow follow the sky.
   const info = weather ? describe(weather.code) : null;
-  const mood = info ? (info.kind === 'clear' || info.kind === 'partly' ? `${info.kind}-${weather!.isDay ? 'day' : 'night'}` : info.kind) : null;
+  const mood = info ? `${info.kind}-${weather!.isDay ? 'day' : 'night'}` : null;
   useEffect(() => {
     const root = document.documentElement;
     if (mood) root.dataset.weather = mood;
@@ -127,7 +128,7 @@ export function WeatherWidget() {
     <div className="wx" ref={rootRef}>
       <motion.button
         type="button"
-        className="wx-card glass"
+        className={`wx-card glass ${state === 'ready' ? 'has-sky' : ''}`}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-label={weather && info && place ? `${Math.round(weather.temp)}°, ${info.label} in ${place.name}. Weather settings` : 'Weather settings'}
@@ -135,6 +136,20 @@ export function WeatherWidget() {
         whileTap={{ scale: 0.97 }}
         transition={spring}
       >
+        <AnimatePresence initial={false}>
+          {state === 'ready' && weather && info && (
+            <motion.span
+              key={mood}
+              className="sky-layer"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <WeatherSky kind={info.kind} isDay={weather.isDay} />
+            </motion.span>
+          )}
+        </AnimatePresence>
         <AnimatePresence mode="wait" initial={false}>
           <motion.span
             key={state === 'ready' ? `ready-${info?.kind}-${weather?.isDay}` : state}

@@ -106,7 +106,7 @@ export function WorkdayProgress({ now }: { now: Date }) {
         {HOURS.map((hour) => {
           const at = ((hour - START_HOUR) / (END_HOUR - START_HOUR)) * 100;
           return (
-            <span key={hour} className={!weekend && at <= percent ? 'is-past' : ''} style={{ left: `${at}%` }}>
+            <span key={hour} className={!weekend && percent > 0 && at <= percent ? 'is-past' : ''} style={{ left: `${at}%` }}>
               {hourLabel(hour)}
             </span>
           );

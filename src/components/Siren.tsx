@@ -1,7 +1,7 @@
 import { useMemo, type CSSProperties } from 'react';
 
-/** Longest urgent-row loop (the border orbit); the others divide it. Keep in sync with styles.css. */
-const SIREN_PERIOD = 4800;
+/** The ❗ breathing loop. Keep in sync with styles.css. */
+const SIREN_PERIOD = 2400;
 
 /**
  * Negative animation delay that locks a newly mounted urgent row onto a shared clock,
