@@ -35,9 +35,10 @@ export function SectionPanel({ section, todos, index, onAdd, onUpdate, onDelete,
   // While dragging, the live order lives here; it's saved once on drop.
   const [dragIds, setDragIds] = useState<string[] | null>(null);
   const { title, Icon } = META[section];
-  // Only the Work list folds on small screens; it's for the desk.
-  const fold = useCollapsible(`${section}-collapsed`);
-  const foldable = section === 'work' && fold.compact;
+  // Every list folds on small screens. Work starts folded and remembers (it's for the desk);
+  // Life and Groceries open fresh every time the app loads.
+  const fold = useCollapsible(section === 'work' ? 'work-collapsed' : null);
+  const foldable = fold.compact;
   const expanded = !foldable || fold.open;
 
   const open = todos.filter((t) => !t.done);

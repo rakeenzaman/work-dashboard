@@ -25,17 +25,32 @@ const LIST_NAMES: Record<Section, string> = { work: 'Work', life: 'Life', grocer
 const COMPLETE_DELAY = 650;
 const UNCOMPLETE_DELAY = 250;
 
+// On touch, a row picks up after a press-and-hold; moving the finger sooner is a scroll instead.
+const HOLD_DELAY = 350;
+const HOLD_SLOP = 8;
+
 export function TodoRow({ todo, onUpdate, onDelete, onGrab, wasDragged }: Props) {
   const [pending, setPending] = useState<boolean | null>(null);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(todo.text);
   const [expanded, setExpanded] = useState(false);
   const [notes, setNotes] = useState(todo.notes);
+  const [held, setHeld] = useState(false);
   const timer = useRef<number | undefined>(undefined);
   const cancelEdit = useRef(false);
+  // Ends a pending or active touch hold (clears its timer and listeners).
+  const releaseHold = useRef<(() => void) | null>(null);
+  // True once a hold fired, so lifting the finger without dragging doesn't also open editing.
+  const wasHeld = useRef(false);
 
   useEffect(() => setNotes(todo.notes), [todo.notes]);
-  useEffect(() => () => window.clearTimeout(timer.current), []);
+  useEffect(
+    () => () => {
+      window.clearTimeout(timer.current);
+      releaseHold.current?.();
+    },
+    [],
+  );
 
   const checked = pending ?? todo.done;
   const others = (Object.keys(LIST_NAMES) as Section[]).filter((s) => s !== todo.section);
@@ -57,14 +72,53 @@ export function TodoRow({ todo, onUpdate, onDelete, onGrab, wasDragged }: Props)
     );
   }
 
-  // Drag from anywhere on the row except its controls. Mouse only: on touch it would fight scrolling.
+  // Drag from anywhere on the row except its controls: straight away with a mouse, after a hold on touch.
   function grab(e: PointerEvent) {
-    if (!onGrab || editing || e.button !== 0 || e.pointerType !== 'mouse') return;
+    if (!onGrab || editing || e.button !== 0) return;
     if ((e.target as Element).closest('input, textarea, .check, .info-btn')) return;
-    onGrab(e);
+    if (e.pointerType === 'mouse') onGrab(e);
+    else startHold(e);
+  }
+
+  function startHold(e: PointerEvent) {
+    releaseHold.current?.();
+    wasHeld.current = false;
+    const start = { x: e.clientX, y: e.clientY };
+    const id = e.pointerId;
+
+    // While held, the page must not scroll under the finger: cancel touchmove (non-passive, so iOS obeys).
+    const blockScroll = (ev: TouchEvent) => ev.cancelable && ev.preventDefault();
+    const move = (ev: globalThis.PointerEvent) => {
+      if (ev.pointerId === id && Math.hypot(ev.clientX - start.x, ev.clientY - start.y) > HOLD_SLOP) end();
+    };
+    const end = () => {
+      window.clearTimeout(hold);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', end);
+      window.removeEventListener('pointercancel', end);
+      document.removeEventListener('touchmove', blockScroll);
+      setHeld(false);
+      releaseHold.current = null;
+    };
+    const hold = window.setTimeout(() => {
+      window.removeEventListener('pointermove', move);
+      document.addEventListener('touchmove', blockScroll, { passive: false });
+      wasHeld.current = true;
+      setHeld(true);
+      onGrab?.(e);
+    }, HOLD_DELAY);
+
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
+    releaseHold.current = end;
   }
 
   function startEdit() {
+    if (wasHeld.current) {
+      wasHeld.current = false;
+      return;
+    }
     if (todo.done || wasDragged?.()) return;
     cancelEdit.current = false;
     setDraft(todo.text);
@@ -88,7 +142,7 @@ export function TodoRow({ todo, onUpdate, onDelete, onGrab, wasDragged }: Props)
   const hasMeta = todo.due || todo.notes;
 
   return (
-    <div className={`row ${checked ? 'is-done' : ''} ${expanded ? 'is-expanded' : ''}`}>
+    <div className={`row ${checked ? 'is-done' : ''} ${expanded ? 'is-expanded' : ''} ${held ? 'is-held' : ''}`}>
       <div className={`row-main ${urgent ? 'is-urgent' : ''}`} style={sirenPhase} onPointerDown={grab}>
         <Checkbox checked={checked} label={`Complete “${todo.text}”`} onToggle={toggle} />
 

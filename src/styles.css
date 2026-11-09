@@ -296,9 +296,10 @@ code {
   gap: 16px;
 }
 
+/* Fold chevrons sit the same distance from the card edge as the lists' (card padding + margin). */
 .workday-top .fold-btn {
   align-self: center;
-  margin: -6px -6px -6px -8px;
+  margin: -6px -2px -6px -8px;
 }
 
 /* Bleeds into the card's side padding so, when clipped for folding, the glowing knob isn't cut off at 9 and 5. */
@@ -503,6 +504,7 @@ code {
 .time-top .fold-btn {
   order: 2;
   margin-left: auto;
+  margin-right: -2px;
 }
 
 .time-body {
@@ -1122,6 +1124,23 @@ body:has(.item.is-dragging) * {
   cursor: inherit !important;
 }
 
+/* Touch: a held row lifts to show it's been picked up (before the finger moves). */
+.row.is-held {
+  background: var(--popover);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.08);
+  transform: scale(1.02);
+  transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* Holding a row shouldn't select its text or pop iOS's callout menu. */
+@media (hover: none) {
+  .row-main {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
 /* Hairline separator inset to the text column, like iOS lists; centered in the gap between items. */
 .item::before {
   content: '';
@@ -1129,8 +1148,21 @@ body:has(.item.is-dragging) * {
   top: -3px;
   left: 46px;
   right: 12px;
-  height: 0.5px;
+  height: 1px;
   background: var(--separator);
+  transform-origin: top;
+}
+
+/*
+ * A 0.5px-tall box gets rounded to 1 device pixel or to nothing depending on where it lands, so
+ * hairlines came and went from row to row. Draw 1px instead (never rounds away), and halve it with a
+ * transform on high-density screens, which is drawn smoothly rather than snapped.
+ */
+@media (min-resolution: 2dppx) {
+  .item::before,
+  .group-row + .group-row::before {
+    transform: scaleY(0.5);
+  }
 }
 
 .row {
@@ -1437,8 +1469,9 @@ body:has(.item.is-dragging) * {
   top: 0;
   left: 52px;
   right: 0;
-  height: 0.5px;
+  height: 1px;
   background: var(--separator);
+  transform-origin: top;
 }
 
 .glyph {
@@ -1644,11 +1677,74 @@ body:has(.item.is-dragging) * {
     width: 100%;
     justify-content: space-between;
   }
+
+  /*
+   * Foldable header cards: same space above and below the header (so a folded card reads centered),
+   * label and number centered on each other, and the workday status sitting by the chevron.
+   */
+  .workday,
+  .time {
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .workday-top,
+  .time-top,
+  .workday-title,
+  .time-title {
+    align-items: center;
+  }
+
+  .workday-status {
+    margin-left: auto;
+  }
+
+  /*
+   * Life and Groceries come first, right under the greeting; the work sections follow.
+   * The list wrappers step out of the layout (display: contents) so every card can be ordered
+   * in one column. The theme toggle and toast are fixed-position, so their order doesn't matter.
+   */
+  .app {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cards,
+  .cards-column {
+    display: contents;
+  }
+
+  #life { order: 1; }
+  #grocery { order: 2; }
+  .workday { order: 3; }
+  .time { order: 4; }
+  #work { order: 5; }
+
+  .workday,
+  .time,
+  .cards .card {
+    margin: 0 0 20px;
+  }
+
+  /* Gives back the bottom space the ticks had before the padding above evened out. */
+  .workday-body {
+    margin-bottom: -4px;
+  }
 }
 
 @media (max-width: 600px) {
   .time {
-    padding: 14px 12px 12px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  /* Same left edge as the workday card (12 + 4 = its 16px padding); chevron stays 16px from the right. */
+  .time-top {
+    margin: 0 4px;
+  }
+
+  .time-top .fold-btn {
+    margin-right: 0;
   }
 
   .time-top {
@@ -1660,11 +1756,16 @@ body:has(.item.is-dragging) * {
 
 @media (max-width: 600px) {
   .workday {
-    padding: 14px 16px 10px;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .workday-body {
     --bleed: 16px;
+  }
+
+  .workday-top .fold-btn {
+    margin-right: 0;
   }
 
   .workday-until {

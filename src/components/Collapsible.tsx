@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { ChevronIcon } from './icons';
 import { spring } from '../motion';
 
-/** At this width and below (phone, small tablet) the work-only sections can be folded away. */
+/** At this width and below (phone, small tablet) sections can be folded away. */
 const COMPACT = '(max-width: 860px)';
 
 function useMediaQuery(query: string) {
@@ -12,8 +12,13 @@ function useMediaQuery(query: string) {
     const list = window.matchMedia(query);
     const change = () => setMatches(list.matches);
     change();
+    // `change` covers normal resizes and rotation; `resize` is a backstop where it doesn't fire.
     list.addEventListener('change', change);
-    return () => list.removeEventListener('change', change);
+    window.addEventListener('resize', change);
+    return () => {
+      list.removeEventListener('change', change);
+      window.removeEventListener('resize', change);
+    };
   }, [query]);
   return matches;
 }
@@ -27,19 +32,22 @@ function readCollapsed(key: string) {
 }
 
 /**
- * A section that folds on small screens. Starts folded there (these are desk tools), and the choice
- * is remembered per device under `storageKey`. On larger screens it's always open.
+ * A section that folds on small screens; on larger screens it's always open.
+ * With a `storageKey` it starts folded (desk tools) and the choice is remembered per device under it.
+ * With `null` it opens fresh every time the app loads.
  */
-export function useCollapsible(storageKey: string) {
+export function useCollapsible(storageKey: string | null) {
   const compact = useMediaQuery(COMPACT);
-  const [collapsed, setCollapsed] = useState(() => readCollapsed(storageKey));
+  const [collapsed, setCollapsed] = useState(() => (storageKey ? readCollapsed(storageKey) : false));
 
   function toggle() {
     setCollapsed((c) => {
-      try {
-        localStorage.setItem(storageKey, String(!c));
-      } catch {
-        // Storage unavailable (private mode): the choice just isn't remembered.
+      if (storageKey) {
+        try {
+          localStorage.setItem(storageKey, String(!c));
+        } catch {
+          // Storage unavailable (private mode): the choice just isn't remembered.
+        }
       }
       return !c;
     });
@@ -71,6 +79,8 @@ export function FoldButton({ open, onToggle, label, controls }: FoldButtonProps)
         e.stopPropagation();
         onToggle();
       }}
+      // Starts at its resting angle, so a section that loads open already points down.
+      initial={false}
       animate={{ rotate: open ? 90 : 0 }}
       whileTap={{ scale: 0.85 }}
       transition={spring}

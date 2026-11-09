@@ -113,7 +113,7 @@ export function TimeTracker({ now, onError }: Props) {
       <header className={`time-top ${compact ? 'is-foldable' : ''}`} onClick={compact ? toggle : undefined}>
         <div className="time-title">
           <h2 id="time-title" className="time-label">
-            Time
+            Work Time Tracking
           </h2>
           <span className="time-total" aria-label={total === null ? undefined : `${total} hours this week`}>
             <AnimatePresence mode="popLayout" initial={false}>
